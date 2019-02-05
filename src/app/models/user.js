@@ -7,7 +7,7 @@ module.exports = (sequelize, DataType) => {
       password: DataType.STRING(100),
       email: DataType.STRING(150),
       passwordResetToken: DataType.STRING(300),
-      passwordResetExpires:{ type: DATE, defautValue: sequelize.NOW} 
+      passwordResetExpires: DataType.DATE
     }, {
       timestamps: false,
       tableName: 'user'
