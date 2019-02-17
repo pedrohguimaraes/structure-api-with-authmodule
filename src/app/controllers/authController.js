@@ -19,17 +19,23 @@ router.post('/', async(req, res) => {
 
     try{
         const postData = req.body;
+
+       
         const user = await User.findAll({ 
             where: {
                 username: postData.username
             }
         });
-        
-        if(!user)
-            res.status(400).send({error: "Usuário não encontrado"});
 
-        // if(!await bcrypt.compare(postData.password, user.password))
-        //     res.status(400).send({error: "Erro ao fazer login, tente novamente"});
+    
+        if(user.length == 0)
+            res.status(400).send({error: "User not found."});
+
+        let compare = await bcrypt.compare(postData.password, user[0].password);
+        console.log(compare); return;
+
+        if(!await bcrypt.compare(postData.password, user[0].password))
+            res.status(400).send({error: "Erro ao fazer login, tente novamente"});
 
         var retorno = { 
             erro: 0,
