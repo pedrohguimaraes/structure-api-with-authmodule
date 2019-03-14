@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {User} = require('../models');
-//const authConfig = require('../../../resources/auth');
+const {Usuario} = require('../models');
+const authConfig = require('../../resources/auth/authConfig');
 const mailer = require('../../modules/mailer');
 const crypto = require('crypto');
 
@@ -14,36 +14,65 @@ function generateToken(params = {}){
     });
 }
 
-// Login
+// login
 router.post('/', async(req, res) => {
 
     try{
         const postData = req.body;
-        const user = await User.findAll({ 
+        const usuario = await Usuario.findAll({ 
             where: {
                 username: postData.username
             }
         });
+
+        if(!usuario)
+            throw "User not found";
+
+        if(!await bcrypt.compare(postData.password, usuario[0].password))
+            throw "Incorrect password";
         
-        if(!user)
-            res.status(400).send({error: "Usuário não encontrado"});
-
-        // if(!await bcrypt.compare(postData.password, user.password))
-        //     res.status(400).send({error: "Erro ao fazer login, tente novamente"});
-
-        var retorno = { 
+        let retorno = { 
             erro: 0,
-            usuario: user, 
-            token: generateToken({ id: user.id }) 
+            usuario: usuario, 
+            token: generateToken({ id: usuario[0].id }) 
         };
 
        return res.status(200).send(retorno);
     }catch(err){
-        var retorno = res.status(400).send(err.error);
+        
+        return res.status(400).send(err);
     }
 });
 
-// Recuperação de senha
+// store user
+router.post('/store', async(req, res) => {
+
+    try{
+        const postData = req.body;
+
+        if(postData.username == null || postData.email == null)
+            throw "Required fields";
+
+        if(postData.senha == undefined)
+            postData.senha = 'padrao123';
+
+        postData.password = await bcrypt.hash(postData.password, 10);
+
+        const usuario = await Usuario.create(postData);
+
+        let retorno = {
+            error: 0,
+            data: usuario,
+            msg: 'Registered successfully'
+        };
+
+        return res.status(400).send(retorno);
+    }catch(err){
+        return res.status(201).send(err);
+    }
+});
+
+// password recovery
 router.post('/forgot', async(req, res) =>{
     const postData = req.body;
 
@@ -90,6 +119,7 @@ router.post('/forgot', async(req, res) =>{
     }
 });
 
+// reset passwordasd
 router.post('/reset', async(req, res) => {
 
     const {email, token, password} = req.body;
