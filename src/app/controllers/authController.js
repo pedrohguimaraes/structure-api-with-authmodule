@@ -79,7 +79,11 @@ router.post('/forgot', async(req, res) =>{
     try{
 
         // Busca o usuário pelo email
-        const user = await User.findAll({ where: { email: postData.email} });
+        const user = await Usuario.findAll({ 
+            where: { 
+                email: postData.email
+            } 
+        });
 
         if(!user)
             return res.status(400).send({error: "User not found"});
@@ -104,15 +108,15 @@ router.post('/forgot', async(req, res) =>{
         // Envio de email
         mailer.sendMail({
             to: email,
-            from: 'pedroguimaraes@email.com.br',
+            from: 'contto@email.com.br',
             template: 'auth/forgot_password',
             context: { token }
         }, (err) => {
             if(err)
                 return res.status(400).send({error: 'Cannot send forgot password email'});
-            
-            return res.send();
         });
+
+        return res.status.(200).send('Please, check your email box to retrieve your password!');
 
     }catch(err){
         res.status(400).send({error: 'Error on forgot password, try again'});
