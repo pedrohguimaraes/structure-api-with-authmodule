@@ -53,8 +53,8 @@ router.post('/store', async(req, res) => {
         if(postData.username == null || postData.email == null)
             throw "Required fields";
 
-        if(postData.senha == undefined)
-            postData.senha = 'padrao123';
+        if(postData.password == undefined)
+            postData.password = 'default000';
 
         postData.password = await bcrypt.hash(postData.password, 10);
 
